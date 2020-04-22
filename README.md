@@ -36,18 +36,21 @@ class FirstWindow:
 
         self.label = Label(master, text="ID State:",bg='orange').grid(row=3)
 
+        #This is the combobox where user will select the associated ID State
         self.combo = ttk.Combobox(master, value=States).grid(row=4)
 
         self.label = Label(master, text=" ",bg='orange').grid(row=5)
          
         self.label = Label(master, text="Enter ID Number:",bg='orange').grid(row=6)
 
+        #Entry Variable where users will enter ID number
         self.entry = Entry(master, textvariable = IDNUmber).grid(row=7)
 
         self.label = Label(master, text=" ",bg='orange').grid(row=8)
 
         self.label = Label(master, text="Select Purchase Volume: ",bg='orange').grid(row=9)
 
+        #This is the combobox where users will select their purchase volume
         self.combo = ttk.Combobox(master, value=Options, width = 25).grid(row=10)
 
         self.label = Label(master, text="*According to Texas State Law, Sledge Distillery can only sell (1500ml) of liquour to each customer in any 30-day period. Receive your verification here for your purchase*",wraplength=500, font=("Helvetica",8,'bold'),bg='orange').grid(row=11)

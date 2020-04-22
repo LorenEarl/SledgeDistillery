@@ -39,7 +39,7 @@ class FirstWindow:
 
         #This is the combobox where user will select the associated ID State
         global combo1
-        combo1 = ttk.Combobox(master, value=States)
+        combo1 = ttk.Combobox(master, value=States,state = 'readonly')
         combo1.grid(row=4)
 
         space2 = Label(master, text=" ",bg='orange').grid(row=5)
@@ -57,7 +57,7 @@ class FirstWindow:
 
         #This is the combobox where users will select their purchase volume
         global combo2
-        combo2 = ttk.Combobox(master, value=Options, width = 25)
+        combo2 = ttk.Combobox(master, value=Options, width = 25, state = 'readonly')
         combo2.grid(row=10)
 
         l5 = Label(master, text="*According to Texas State Law, Sledge Distillery can only sell (1500ml) of liquour to each customer in any 30-day period. Receive your verification here for your purchase*",wraplength=500, font=("Helvetica",8,'bold'),bg='orange').grid(row=11)
@@ -72,12 +72,22 @@ def Verify():
     #Run the verification, if the ID passes, set the text values (like result Title) to the values that would create the appropriate window. If it fails, vice versa.
     #All logic and connection should take place in this function, it is the command of the verify button. 
     
-    #These variables get the inpur the user entered in the first screen, use these when verifying 
-    IDNUmber = IDEntry.get()
-    SelectedState = combo1.get()
-    SelectedVolume = combo2.get()
-    s = SelectedVolume.split('(')
-    s2 = s[1].split('m')
+   
+    try:  #These variables get the inpur the user entered in the first screen, use these when verifying 
+        IDNUmber = IDEntry.get()
+        SelectedState = combo1.get()
+        SelectedVolume = combo2.get()
+        s = SelectedVolume.split('(')
+        s2 = s[1].split('m')
+    
+    except: #Try block handles the error should the user not fill out all values. 
+        errorWindow = Tk()
+        errorLabel = Label(errorWindow,text='ERROR: Please fill out every value completely.',bg='red')
+        errorButton = Button(errorWindow,text = 'Ok',command = errorWindow.destroy,bg='green')
+        errorLabel.pack()
+        errorButton.pack()
+        errorWindow.mainloop()
+
     #this is the int number that tells how much volume was selected
     volumeNumber = int(s2[0])
 
@@ -104,10 +114,10 @@ def Verify():
 
 
 
-# This function created the second popup, all logic and connection should take place in the above Verify() function
-def PopUp():
-    
 
+def PopUp(): #This function created the second popup, all logic and connection should take place in the above Verify() function
+    
+    global Second
     Second = Tk()
 
     Second.configure(bg='orange')
@@ -124,16 +134,19 @@ def PopUp():
 
     Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=6)
 
-    Second.button = Button(Second, text = 'Finish', command = Second.destroy ).grid(row=7,sticky = E)
+    Second.button = Button(Second, text = 'Finish', command = (cleanUp)).grid(row=7,sticky = E)
 
 
    
 
+def cleanUp():
+    
+    IDEntry.delete(0,'end')
+    combo1.set(' ')
+    combo2.set(' ')
+    Second.destroy()
 
-
-
-#Runs Guis
-
+#Runs Gui
 root = Tk()
 my_Gui = FirstWindow(root)
 root.mainloop()

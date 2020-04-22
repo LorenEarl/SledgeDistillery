@@ -12,10 +12,12 @@ from tkinter import *
 from tkinter import ttk
 
 
-#ALl possible state ID Abbreviations 
+#ALl possible state ID Abbreviations, loaded into the FirstWindow Combobox 1 values
 States = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
-#purchase options
+
+#purchase options, loaded into the FirstWindow Combobox 2 values
 Options = ['One [1] small bottle (750ml)','Two [2] small bottles (1500ml)','One [1] large bottle (1500ml)']
+
 #Initialize variable used to store user entered ID number
 IDNUmber = ""
 SelectedState = ""
@@ -35,7 +37,6 @@ class FirstWindow:
         self.label = Label(master, text="ID State:",bg='orange').grid(row=3)
 
         self.combo = ttk.Combobox(master, value=States).grid(row=4)
-        SelectedState = self.combo
 
         self.label = Label(master, text=" ",bg='orange').grid(row=5)
          
@@ -59,28 +60,51 @@ class FirstWindow:
 def Verify():
     #Run the verification, if the ID passes, set the text values (like result Title) to the values that would create the appropriate window. If it fails, vice versa.
     #All logic and connection should take place in this function, it is the command of the verify button. 
-    global resultTitle 
+     
+    global outcome
+    global messageText
+
+    #Set these variables if the ID is approved
+    # outcome = 'Approved!'
+    # messageText = 
+
+
+    #Set these variables if the ID is NOT approved
+    outcome = 'We apologize.'
+    messageText = 'Test message'
 
     PopUp()
+    
 
 
 
-# This function created the second popup, all logic and connection should take place in Verify() function
+# This function created the second popup, all logic and connection should take place in the above Verify() function
 def PopUp():
-    resultTitle = "test"
+    
 
     Second = Tk()
 
     Second.configure(bg='orange')
 
-    Second.label = Label(Second, text=resultTitle ,width=30, font=("Times New Roman",15),bg='orange').grid(row=1)
+    Second.label = Label(Second, text="Verification Result" ,width=30, font=("Times New Roman",15),bg='orange').grid(row=1)
 
     Second.label = Label(Second, text = " ",bg='orange').grid(row=2)
 
-    Second.label = Label(Second, text = "Approved!", font = 15, bg = 'Orange').grid(row=3)
+    Second.label = Label(Second, text = outcome, font = 10, bg = 'Orange').grid(row=3)
+
+    Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=4)
+
+    Second.label = Label(Second, text = messageText, font = 8, bg = 'Orange').grid(row=5)
+
+    Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=6)
+
+    Second.button = Button(Second, text = 'Finish', command = Second.destroy ).grid(row=7,sticky = E)
 
 
     print("Verification Complete...")
+
+
+
 
 #Runs Guis
 

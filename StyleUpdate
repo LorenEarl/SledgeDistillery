@@ -31,10 +31,14 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
     def __init__(self,master):
         
         self.master = master
+
+        
+
         master.configure(bg='orange')
-        l1 = Label(master, text="Sledge Distillery Verification",width=40, font=("Times New Roman",20),bg='orange').grid(row=1)
+        l1 = Label(master, text="Sledge Distillery Verification",width=40, font=("Montserrat",20),bg='orange')
+        l1.grid(row=1)
         space1 = Label(master, text=" ",bg='orange').grid(row=2)
-        l2 = Label(master, text="ID State:",bg='orange').grid(row=3)
+        l2 = Label(master, text="ID State:",bg='orange',font=('Helvetica',10)).grid(row=3)
 
         #This is the combobox where user will select the associated ID State
         global combo1
@@ -42,7 +46,7 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
         combo1.grid(row=4)
 
         space2 = Label(master, text=" ",bg='orange').grid(row=5)
-        l3 = Label(master, text="Enter ID Number:",bg='orange').grid(row=6)
+        l3 = Label(master, text="Enter ID Number:",bg='orange',font=('Helvetica',10)).grid(row=6)
 
         #Entry Variable where users will enter ID number
         global IDEntry
@@ -50,29 +54,37 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
         IDEntry.grid(row=7)
 
         space3 = Label(master, text=" ",bg='orange').grid(row=8)
-        l4 = Label(master, text="Select Purchase Volume: ",bg='orange').grid(row=9)
+        l4 = Label(master, text="Select Purchase Volume: ",bg='orange',font=('Helvetica',10)).grid(row=9)
 
         #This is the combobox where users will select their purchase volume
         global combo2
         combo2 = ttk.Combobox(master, value=Options, width = 25, state = 'readonly')
         combo2.grid(row=10)
 
-        l5 = Label(master, text="*According to Texas State Law, Sledge Distillery can only sell (1500ml) of liquour to each customer in any 30-day period. Receive your verification here for your purchase*",wraplength=500, font=("Helvetica",8,'bold'),bg='orange').grid(row=11)
+        l5 = Label(master, text="*According to Texas State Law, Sledge Distillery can only sell (1500ml) of liquour to each customer in any 30-day period. Receive your verification here for your purchase*",wraplength=500, font=('Serif',9,'bold'),bg='orange').grid(row=11)
         space4 = Label(master, text=" ",bg='orange').grid(row=12)
-        verifyButton = Button(master, text="Verify",command=Verify).grid(row=13,sticky=NE)
+        verifyButton = Button(master, text="Verify",command=Verify,relief=RAISED).grid(row=13,sticky=NE)
        
 def Verify():
     #Run the verification, if the ID passes, set the text values (like result Title) to the values that would create the appropriate window (these variables are identified below). If it fails, vice versa.
     #All logic and connection should take place in this function, it is the command of the verify button. 
     
    
-    try:  #These variables get the inpur the user entered in the first screen, use these when verifying 
-        IDNUmber = IDEntry.get()
+    try:  #These variables get the input the user entered in the first screen, use these when verifying 
+        IDNUmber = int(IDEntry.get())
         SelectedState = combo1.get()
         SelectedVolume = combo2.get()
         s = SelectedVolume.split('(')
         s2 = s[1].split('m')
-    
+
+    except (ValueError):
+        errorWindow = Tk()
+        errorLabel = Label(errorWindow,text='ERROR: Ensure ID Number is Entered Correctly.',bg='red')
+        errorButton = Button(errorWindow,text = 'Ok',command = errorWindow.destroy,bg='green')
+        errorLabel.pack()
+        errorButton.pack()
+        errorWindow.mainloop()
+
     except: #Try block handles the error should the user not fill out all values. 
         errorWindow = Tk()
         errorLabel = Label(errorWindow,text='ERROR: Please fill out every value completely.',bg='red')
@@ -100,9 +112,7 @@ def Verify():
     PopUp()
     
     #prints selected inputs
-    print('ID State is: ' + SelectedState)
-    print('ID Number is: ' + IDNUmber)
-    print('Volume is:', volumeNumber)
+    print('Record:',SelectedState,IDNUmber,volumeNumber,'ml')
     print("Verification Complete...")
 
 
@@ -118,12 +128,12 @@ def PopUp(): #This function created the second popup, all logic and connection s
     Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=4)
     Second.label = Label(Second, text = messageText, font = 8, wraplength = 400, bg = 'Orange').grid(row=5)
     Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=6)
-    Second.button = Button(Second, text = 'Finish', command = (cleanUp)).grid(row=7,sticky = E)
+    Second.button = Button(Second, text = 'Finish', command = (cleanUp),relief=RAISED).grid(row=7,sticky = E)
 
 def cleanUp(): 
     IDEntry.delete(0,'end')
-    combo1.set(' ')
-    combo2.set(' ')
+    combo1.set('')
+    combo2.set('')
     Second.destroy()
 
 #Runs Gui

@@ -18,7 +18,13 @@
 
 from tkinter import *
 from tkinter import ttk
+from tkinter import Image
+import pyodbc
+import datetime
 
+#Access database connection
+conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\pcboy\Desktop\sledgedb.accdb;')
+cursor = conn.cursor()
 
 #ALl possible state ID Abbreviations, loaded into the FirstWindow Combobox 1 values
 States = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
@@ -27,12 +33,13 @@ States = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN',
 Options = ['One [1] small bottle (750ml)','Two [2] small bottles (1500ml)','One [1] large bottle (1500ml)']
 
 
+
 class FirstWindow: #Fairly obvious, this creates the opening window for user input
     def __init__(self,master):
         
         self.master = master
 
-        
+        img = PhotoImage(file = r'C:\Users\pcboy\Documents\Logo.png')
 
         master.configure(bg='orange')
         l1 = Label(master, text="Sledge Distillery Verification",width=40, font=("Montserrat",20),bg='orange')
@@ -67,7 +74,7 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
        
 def Verify():
     #Run the verification, if the ID passes, set the text values (like result Title) to the values that would create the appropriate window (these variables are identified below). If it fails, vice versa.
-    #All logic and connection should take place in this function, it is the command of the verify button. 
+    #All logic and connection should take place in this function, it is the command of the verify button.
     
    
     try:  #These variables get the input the user entered in the first screen, use these when verifying 
@@ -76,7 +83,7 @@ def Verify():
         SelectedVolume = combo2.get()
         s = SelectedVolume.split('(')
         s2 = s[1].split('m')
-
+        
     except (ValueError):
         errorWindow = Tk()
         errorLabel = Label(errorWindow,text='ERROR: Ensure ID Number is Entered Correctly.',bg='red')
@@ -96,17 +103,40 @@ def Verify():
     #this is the int number that tells how much volume was selected, useful variable
     volumeNumber = int(s2[0])
 
+    #combines all user data into one record for reference against access database
+    global overall
+    overall = IDNUmber, SelectedState, volumeNumber
     global outcome
     global messageText
+    global availableDate2
 
-    #Set these variables if the ID is approved
-    outcome = 'Approved!'
-    messageText = 'Take the printed receipt below and present at the time of purchase.'
+    cursor.execute("SELECT * FROM `Main` WHERE DL=? and State=?",IDNUmber,SelectedState)
+    rows = cursor.fetchall()
 
-
-    #Set these variables if the ID is NOT approved
-    #outcome = 'We apologize.'
-    #messageText = 'Test message'
+    if len(rows)==1:
+        print('present in last 30-days,checking volume')
+        cursor.execute("SELECT * FROM `Main` WHERE DL=? and State=?",IDNUmber,SelectedState)
+        for rows in cursor.fetchall():
+             pass
+        if rows[2]+volumeNumber > 1500:
+            print('double no')
+            outcome = 'We apologize for the inconvenience...'
+            cursor.execute("SELECT DateAvailable FROM `Main` WHERE DL=? and State=?",IDNUmber,SelectedState)
+            for rows in cursor.fetchall():
+                pass
+            availableDate =str(rows[0]).split(' ')
+            availableDate2=availableDate[0]
+            print('Next Allowable date is...',availableDate2)
+            messageText = 'According to Texas state law, you are not verified to purchase liquor from Sledge Distillery until '+ availableDate2
+        elif rows[2]+volumeNumber <= 1500:
+            print('ok fine')
+            outcome = 'Approved!'
+            messageText = 'Take the printed receipt below and present at the time of purchase.'
+    elif len(rows)==0:
+        print('he good')
+        outcome = 'Approved!'
+        messageText = 'Take the printed receipt below and present at the time of purchase.'
+    
 
     #Runs the pop up function
     PopUp()

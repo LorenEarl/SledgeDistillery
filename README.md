@@ -18,7 +18,7 @@
 
 from tkinter import *
 from tkinter import ttk
-from tkinter import Image
+from PIL import Image, ImageTk
 import pyodbc
 import datetime
 
@@ -30,7 +30,7 @@ cursor = conn.cursor()
 States = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
 #purchase options, loaded into the FirstWindow Combobox 2 values
-Options = ['One [1] small bottle (750ml)','Two [2] small bottles (1500ml)','One [1] large bottle (1500ml)']
+Options = ['One [1] small bottle (375ml)','Two [2] small bottles (750ml)','One [1] large bottle (750ml)','Two [2] large bottles (1500ml)','one [1] small & one [1] large bottle (1125ml)']
 
 
 
@@ -39,17 +39,19 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
         
         self.master = master
 
-        img = PhotoImage(file = r'C:\Users\pcboy\Documents\Logo.png')
+        imgPath = r'C:\Users\pcboy\Desktop\Logo.png'
+        img = ImageTk.PhotoImage(Image.open(imgPath))
 
         master.configure(bg='orange')
-        l1 = Label(master, text="Sledge Distillery Verification",width=40, font=("Montserrat",20),bg='orange')
+        l1 = Label(master, text="Sledge Distillery Verification  ",width=500, font=("Montserrat",20),bg='orange',image=img,compound=RIGHT)
         l1.grid(row=1)
-        space1 = Label(master, text=" ",bg='orange').grid(row=2)
+        l1.image=img
+
         l2 = Label(master, text="ID State:",bg='orange',font=('Helvetica',10)).grid(row=3)
 
         #This is the combobox where user will select the associated ID State
         global combo1
-        combo1 = ttk.Combobox(master, value=States,state = 'readonly')
+        combo1 = ttk.Combobox(master, value=States, justify=CENTER, state = 'readonly')
         combo1.grid(row=4)
 
         space2 = Label(master, text=" ",bg='orange').grid(row=5)
@@ -61,11 +63,13 @@ class FirstWindow: #Fairly obvious, this creates the opening window for user inp
         IDEntry.grid(row=7)
 
         space3 = Label(master, text=" ",bg='orange').grid(row=8)
-        l4 = Label(master, text="Select Purchase Volume: ",bg='orange',font=('Helvetica',10)).grid(row=9)
+
+        l4 = Label(master, text="Select Purchase Volume(or ML equivalent): ",bg='orange',font=('Helvetica',10)).grid(row=9)
 
         #This is the combobox where users will select their purchase volume
         global combo2
-        combo2 = ttk.Combobox(master, value=Options, width = 25, state = 'readonly')
+        combo2 = ttk.Combobox(master, value=Options, justify=CENTER, width = 36, state = 'readonly')
+         
         combo2.grid(row=10)
 
         l5 = Label(master, text="*According to Texas State Law, Sledge Distillery can only sell (1500ml) of liquour to each customer in any 30-day period. Receive your verification here for your purchase*",wraplength=500, font=('Serif',9,'bold'),bg='orange').grid(row=11)
@@ -78,7 +82,7 @@ def Verify():
     
    
     try:  #These variables get the input the user entered in the first screen, use these when verifying 
-        IDNUmber = int(IDEntry.get())
+        IDNUmber = float(IDEntry.get())
         SelectedState = combo1.get()
         SelectedVolume = combo2.get()
         s = SelectedVolume.split('(')
@@ -101,7 +105,7 @@ def Verify():
         errorWindow.mainloop()
 
     #this is the int number that tells how much volume was selected, useful variable
-    volumeNumber = int(s2[0])
+    volumeNumber = float(s2[0])
 
     #combines all user data into one record for reference against access database
     global overall
@@ -112,7 +116,8 @@ def Verify():
 
     cursor.execute("SELECT * FROM `Main` WHERE DL=? and State=?",IDNUmber,SelectedState)
     rows = cursor.fetchall()
-
+    # Logic that checks for database entry matching the input, if there isn't then they are allowed, 
+    #   if so it will check volum/purchase history and make a decision according to the findings
     if len(rows)==1:
         print('present in last 30-days,checking volume')
         cursor.execute("SELECT * FROM `Main` WHERE DL=? and State=?",IDNUmber,SelectedState)
@@ -131,12 +136,14 @@ def Verify():
         elif rows[2]+volumeNumber <= 1500:
             print('ok fine')
             outcome = 'Approved!'
-            messageText = 'Take the printed receipt below and present at the time of purchase.'
+            volumeLeft=1500-rows[2]-volumeNumber
+            messageText = 'Take the printed receipt below and present at the time of purchase. \n*You have '+str(volumeLeft)+' ml left available to purchase.*'
     elif len(rows)==0:
         print('he good')
         outcome = 'Approved!'
-        messageText = 'Take the printed receipt below and present at the time of purchase.'
-    
+        volumeLeft=1500-volumeNumber
+        messageText = 'Take the printed receipt below and present at the time of purchase. \n*You have '+str(volumeLeft)+' ml left available to purchase.*'
+ 
 
     #Runs the pop up function
     PopUp()
@@ -151,8 +158,9 @@ def Verify():
 def PopUp(): #This function created the second popup, all logic and connection should take place in the above Verify() function  
     global Second
     Second = Tk()
+    Second.geometry("455x240+200+300")
     Second.configure(bg='orange')
-    Second.label = Label(Second, text="Verification Result" ,width=30, font=("Times New Roman",15),bg='orange').grid(row=1)
+    Second.label = Label(Second, text="Verification Result" ,width=30, font=("Times New Roman",20),bg='orange').grid(row=1)
     Second.label = Label(Second, text = " ",bg='orange').grid(row=2)
     Second.label = Label(Second, text = outcome, font = 10, bg = 'Orange').grid(row=3)
     Second.label = Label(Second, text = ' ', bg = 'orange').grid(row=4)

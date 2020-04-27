@@ -87,7 +87,8 @@ def Verify():
         SelectedVolume = combo2.get()
         s = SelectedVolume.split('(')
         s2 = s[1].split('m')
-        
+        if SelectedState == '':
+            raise Exception
     except (ValueError): #Try block handles the error should the user not fill out ID# Correctly. 
         errorWindow = Tk()
         errorWindow.title('Error')
